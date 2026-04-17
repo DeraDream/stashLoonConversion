@@ -1,75 +1,209 @@
-# StashAndLoon
+# StashLoon Conversion
 
-一个适合部署在 Linux VPS 或 macOS 本地的轻量站点，用来做两件事：
+GitHub 仓库地址：
 
-1. 上传现有的 Stash YAML，生成可访问链接，并在线转换成 Loon 配置。
-2. 提交节点链接，例如 `vless://...#节点名`，服务端把节点追加到固定模板中，生成 Stash YAML 和 Loon 配置文件。
+[https://github.com/DeraDream/stashLoonConversion](https://github.com/DeraDream/stashLoonConversion)
 
-## 当前能力
+这是一个用于 `Stash` 和 `Loon` 的配置转换服务，支持：
 
-- 前端网页：填写节点、上传 YAML、展示结果和导入链接
-- 后端 API：零依赖 Python `http.server`
-- 文件分享：生成 `/files/<token>/stash.yaml` 和 `/files/<token>/loon.conf`
-- 配置列表：保存历史上传和生成记录，支持重复查看和导入
-- Stash 导入链接：`stash://install-config?...`
-- Loon 导入链接：`loon://import?sub=...`
-- 当前优先支持：`vless://`
+- 上传现有 `Stash YAML`
+- 在线转换为 `Loon conf`
+- 提交节点链接生成配置
+- 保存历史配置列表
+- 下载配置文件
+- 生成配置链接
+- 在手机浏览器中直接唤起 `Stash` 和 `Loon` 导入
+
+当前优先支持：
+
+- `vless://`
 
 ## 页面结构
 
 - `/`：主页，只显示配置列表和操作按钮
 - `/convert`：子页面，用来上传 YAML 或提交节点生成配置
 
-## Linux 命令安装
+## 功能说明
 
-项目已经带了命令安装器与菜单脚本，适合后续放到 GitHub 后做一键安装。
+- 首页展示所有已保存的配置记录
+- 每条记录支持下载 `stash.yaml` 和 `loon.conf`
+- 每条记录支持复制配置链接
+- 每条记录支持直接导入 `Stash`
+- 每条记录支持直接导入 `Loon`
+- 上传或生成的新配置会自动写入列表
 
-- 初次安装入口：`install.sh`
-- 全局短命令：`stashloon`
-- 菜单能力：安装、更新、卸载、重启、查看状态
-- 防重复安装：如果服务器已经安装，再次执行安装命令会直接进入菜单，而不是重复安装
+## Linux VPS 安装
 
-当前脚本面向 Linux VPS，安装后会：
+当前推荐方式是先克隆仓库，再执行安装命令。
 
-- 把程序部署到 `/opt/stashloon/app`
-- 把环境配置放到 `/etc/stashloon/stashloon.env`
-- 创建 `systemd` 服务 `/etc/systemd/system/stashloon.service`
-- 创建全局命令 `/usr/local/bin/stashloon`
+### 1. 克隆仓库
 
-### 本地仓库安装
+```bash
+git clone git@github.com:DeraDream/stashLoonConversion.git
+cd stashLoonConversion
+```
+
+如果服务器没有配置 GitHub SSH，也可以用 HTTPS：
+
+```bash
+git clone https://github.com/DeraDream/stashLoonConversion.git
+cd stashLoonConversion
+```
+
+### 2. 执行安装
 
 ```bash
 sudo bash install.sh
 ```
 
-### 后续 GitHub 一键安装预留
+安装器会自动完成这些事情：
 
-等你把项目传到 GitHub 后，可以用同一套脚本走远程安装。脚本已经支持 `REPO_URL` 环境变量，例如：
+- 安装程序到 `/opt/stashloon/app`
+- 写入环境配置到 `/etc/stashloon/stashloon.env`
+- 创建 `systemd` 服务 `stashloon.service`
+- 创建全局命令 `stashloon`
+- 启动服务并设置开机自启
+
+### 3. 安装完成后使用菜单
+
+安装完成后会自动进入菜单。
+
+后续你也可以随时输入下面的命令再次调出菜单：
 
 ```bash
-curl -fsSL https://your-domain.example/install.sh | sudo REPO_URL=https://github.com/you/repo.git bash
+sudo stashloon
 ```
 
-你把 GitHub 地址给我后，我可以把这条最终命令和远程引导脚本一起收口好。
+菜单包含这些操作：
 
-## macOS 本地部署
+- 安装
+- 更新
+- 重启
+- 卸载
+- 状态
 
-你的系统是 macOS，本项目现在已经支持本地启动并开放端口给浏览器访问。
+### 4. 防重复安装逻辑
 
-### 方式 1：直接启动
+如果服务器已经安装过本服务，再次执行：
+
+```bash
+sudo bash install.sh
+```
+
+不会重复安装，而是直接打开菜单。
+
+## 更新项目
+
+如果你已经安装过服务，后续更新建议这样做：
+
+### 方式 1：通过菜单更新
+
+```bash
+sudo stashloon
+```
+
+然后选择：
+
+```bash
+2. 更新
+```
+
+### 方式 2：重新执行安装命令
+
+如果当前目录是最新源码，也可以重新执行：
+
+```bash
+sudo bash install.sh
+```
+
+如果系统已经安装，会直接进入菜单，不会重复覆盖安装流程。
+
+## 卸载项目
+
+```bash
+sudo stashloon
+```
+
+然后选择：
+
+```bash
+4. 卸载
+```
+
+卸载时会：
+
+- 停止并移除 `systemd` 服务
+- 删除 `/opt/stashloon`
+- 删除 `/usr/local/bin/stashloon`
+
+默认会保留：
+
+- `/etc/stashloon/stashloon.env`
+
+这样你以后重装时还能继续使用原配置。
+
+## 服务配置文件
+
+安装后主要文件位置：
+
+- 程序目录：`/opt/stashloon/app`
+- 环境配置：`/etc/stashloon/stashloon.env`
+- 服务文件：`/etc/systemd/system/stashloon.service`
+- 全局命令：`/usr/local/bin/stashloon`
+
+## 修改访问地址
+
+安装完成后，编辑环境文件：
+
+```bash
+sudo nano /etc/stashloon/stashloon.env
+```
+
+例如：
+
+```bash
+HOST=0.0.0.0
+PORT=8080
+PUBLIC_BASE_URL=http://your-server-ip:8080
+SUBSCRIPTION_USERINFO=
+```
+
+修改后重启服务：
+
+```bash
+sudo stashloon
+```
+
+然后选择：
+
+```bash
+3. 重启
+```
+
+## 浏览器访问
+
+假设你配置的是：
+
+```bash
+PORT=8080
+PUBLIC_BASE_URL=http://your-server-ip:8080
+```
+
+那么访问地址就是：
+
+- 首页列表：`http://your-server-ip:8080/`
+- 转换页面：`http://your-server-ip:8080/convert`
+
+## macOS 本地运行
+
+如果你是在本机开发调试：
 
 ```bash
 cd /Users/dfw/Downloads/stashAndLoon
 python3 server.py
 ```
 
-启动后本机浏览器访问：
-
-```bash
-http://127.0.0.1:8080
-```
-
-### 方式 2：推荐，用启动脚本自动生成局域网访问地址
+或者：
 
 ```bash
 cd /Users/dfw/Downloads/stashAndLoon
@@ -77,93 +211,13 @@ chmod +x start-macos.sh
 ./start-macos.sh
 ```
 
-脚本会自动探测你 Mac 的局域网 IP，并把 `PUBLIC_BASE_URL` 设成：
-
-```bash
-http://你的局域网IP:8080
-```
-
-这样生成出来的 Stash/Loon 导入链接，在同一局域网里的手机上也能直接使用。
-
-脚本也会强制让服务监听在：
-
-```bash
-0.0.0.0:8080
-```
-
-避免因为终端里残留的 `HOST=127.0.0.1` 导致只能本机访问。
-
-## 环境变量
-
-可以复制一份环境变量模板：
-
-```bash
-cp .env.example .env
-```
-
-默认配置如下：
-
-```bash
-HOST=0.0.0.0
-PORT=8080
-PUBLIC_BASE_URL=http://127.0.0.1:8080
-```
-
-如果你希望手机或其他电脑访问，请把 `.env` 里的 `PUBLIC_BASE_URL` 改成你 Mac 的局域网 IP，例如：
-
-```bash
-PUBLIC_BASE_URL=http://192.168.1.25:8080
-```
-
-然后重新启动：
-
-```bash
-python3 server.py
-```
-
-## 开放端口给浏览器访问
-
-### 本机访问
-
-浏览器打开：
+本机浏览器访问：
 
 ```bash
 http://127.0.0.1:8080
 ```
 
-### 局域网访问
-
-先查本机 IP：
-
-```bash
-ipconfig getifaddr en0
-```
-
-如果你用的是 USB 网卡或其他网络接口，也可能是：
-
-```bash
-ipconfig getifaddr en1
-```
-
-得到 IP 后，局域网其他设备浏览器访问：
-
-```bash
-http://你的IP:8080
-```
-
-### macOS 防火墙
-
-如果浏览器打不开，通常是 macOS 防火墙拦截了 Python。
-
-你可以在：
-
-`系统设置 -> 网络 -> 防火墙`
-
-里允许 `Python` 接收入站连接。
-
-也可以先临时关闭防火墙测试。
-
-## Linux / VPS 部署
+局域网访问时，请把 `PUBLIC_BASE_URL` 改成你的本机 IP。
 
 ## API
 
@@ -193,55 +247,24 @@ http://你的IP:8080
 
 获取已保存的配置记录列表，前端会用它渲染历史记录和操作按钮。
 
-### `systemd` 服务
+## 数据存储方式
 
-创建 `/etc/systemd/system/stash-and-loon.service`：
+当前版本没有使用数据库，而是文件存储：
 
-```ini
-[Unit]
-Description=Stash And Loon Converter
-After=network.target
+- 配置文件保存在 `data/generated/<token>/`
+- 记录索引保存在 `data/index.json`
 
-[Service]
-Type=simple
-WorkingDirectory=/opt/stashAndLoon
-Environment=PUBLIC_BASE_URL=https://your-domain.com
-ExecStart=/usr/bin/python3 /opt/stashAndLoon/server.py
-Restart=always
-RestartSec=3
-User=root
+Linux VPS 安装后，这些数据位于：
 
-[Install]
-WantedBy=multi-user.target
-```
+- `/opt/stashloon/app/data/`
 
-然后执行：
+macOS 本地运行时，这些数据位于项目目录下的：
 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now stash-and-loon
-sudo systemctl status stash-and-loon
-```
-
-### Nginx 反代
-
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+- `data/`
 
 ## 后续可扩展
 
 - 增加更多协议解析：`trojan://`、`ss://`、`vmess://`
-- 接入你自己的固定模板字段
-- 持久化记录用户提交的节点和生成历史
-- 增加鉴权和后台管理
+- 接入固定模板字段
+- 增加后台管理
+- 切换到 SQLite 或 MySQL
