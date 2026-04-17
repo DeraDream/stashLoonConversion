@@ -47,7 +47,7 @@ curl -fsSL https://raw.githubusercontent.com/DeraDream/stashLoonConversion/main/
 - 从 GitHub 拉取最新代码
 - 检测服务是否已安装
 - 未安装时执行安装
-- 已安装时直接打开菜单
+- 已安装时直接打开菜单，不会重复安装
 
 ### 手动执行仓库安装
 
@@ -111,6 +111,12 @@ sudo stashloon
 2. 更新
 ```
 
+更新时会强制从下面这个仓库重新拉取最新代码，而不是复用服务器上的旧副本：
+
+```bash
+https://github.com/DeraDream/stashLoonConversion.git
+```
+
 ### 方式 2：重新执行安装命令
 
 也可以重新执行一键安装命令：
@@ -153,6 +159,10 @@ sudo stashloon
 - 环境配置：`/etc/stashloon/stashloon.env`
 - 服务文件：`/etc/systemd/system/stashloon.service`
 - 全局命令：`/usr/local/bin/stashloon`
+
+环境配置还会保存更新源地址：
+
+- `REPO_URL=https://github.com/DeraDream/stashLoonConversion.git`
 
 ## 修改访问地址
 

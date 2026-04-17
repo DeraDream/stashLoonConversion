@@ -9,6 +9,7 @@ CONFIG_DIR="/etc/stashloon"
 ENV_FILE="${CONFIG_DIR}/stashloon.env"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 BIN_LINK="/usr/local/bin/stashloon"
+DEFAULT_REPO_URL="https://github.com/DeraDream/stashLoonConversion.git"
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -71,7 +72,13 @@ HOST=0.0.0.0
 PORT=8080
 PUBLIC_BASE_URL=http://127.0.0.1:8080
 SUBSCRIPTION_USERINFO=
+REPO_URL=https://github.com/DeraDream/stashLoonConversion.git
 EOF
+    return
+  fi
+
+  if ! grep -q '^REPO_URL=' "${ENV_FILE}"; then
+    printf '\nREPO_URL=%s\n' "${DEFAULT_REPO_URL}" >>"${ENV_FILE}"
   fi
 }
 
@@ -130,11 +137,23 @@ copy_project_files() {
 }
 
 prepare_source_dir() {
-  if [[ -n "${REPO_URL:-}" ]]; then
+  local repo_url="${REPO_URL:-}"
+
+  if [[ -z "${repo_url}" ]] && [[ -f "${ENV_FILE}" ]]; then
+    repo_url="$(
+      awk -F= '$1=="REPO_URL" {print substr($0, index($0, "=") + 1)}' "${ENV_FILE}" | tail -n 1
+    )"
+  fi
+
+  if [[ -z "${repo_url}" ]]; then
+    repo_url="${DEFAULT_REPO_URL}"
+  fi
+
+  if [[ -n "${repo_url}" ]]; then
     local temp_dir
     temp_dir="$(mktemp -d)"
-    info "从 Git 仓库拉取源码: ${REPO_URL}"
-    git clone --depth 1 "${REPO_URL}" "${temp_dir}/repo" >/dev/null 2>&1
+    info "从 Git 仓库拉取源码: ${repo_url}"
+    git clone --depth 1 "${repo_url}" "${temp_dir}/repo" >/dev/null 2>&1
     printf "%s\n" "${temp_dir}/repo"
     return
   fi
