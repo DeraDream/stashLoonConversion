@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+resolve_script_dir() {
+  local source_path="$1"
+  while [[ -L "${source_path}" ]]; do
+    local source_dir
+    source_dir="$(cd -P "$(dirname "${source_path}")" && pwd)"
+    source_path="$(readlink "${source_path}")"
+    [[ "${source_path}" != /* ]] && source_path="${source_dir}/${source_path}"
+  done
+  cd -P "$(dirname "${source_path}")" && pwd
+}
+
+SCRIPT_DIR="$(resolve_script_dir "${BASH_SOURCE[0]}")"
 # shellcheck source=./common.sh
 source "${SCRIPT_DIR}/common.sh"
 
@@ -52,7 +63,10 @@ menu_uninstall() {
     return
   fi
 
-  read -r -p "确认卸载 ${APP_NAME} 吗？这会删除程序文件，但保留 ${CONFIG_DIR} 配置。 [y/N] " answer
+  if ! prompt_input "确认卸载 ${APP_NAME} 吗？这会删除程序文件，但保留 ${CONFIG_DIR} 配置。 [y/N] " answer; then
+    warn "未读取到确认输入，已取消卸载。"
+    return
+  fi
   if [[ ! "${answer}" =~ ^[Yy]$ ]]; then
     warn "已取消卸载。"
     return
@@ -87,7 +101,10 @@ show_menu() {
     printf "4. 卸载\n"
     printf "5. 状态\n"
     printf "0. 退出\n"
-    read -r -p "请选择操作: " choice
+    if ! prompt_input "请选择操作: " choice; then
+      warn "未检测到可交互终端，退出菜单。"
+      exit 0
+    fi
     case "${choice}" in
       1) menu_install ;;
       2) menu_update ;;

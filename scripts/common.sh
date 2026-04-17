@@ -13,6 +13,17 @@ DEFAULT_REPO_URL="https://github.com/DeraDream/stashLoonConversion.git"
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+resolve_script_dir() {
+  local source_path="$1"
+  while [[ -L "${source_path}" ]]; do
+    local source_dir
+    source_dir="$(cd -P "$(dirname "${source_path}")" && pwd)"
+    source_path="$(readlink "${source_path}")"
+    [[ "${source_path}" != /* ]] && source_path="${source_dir}/${source_path}"
+  done
+  cd -P "$(dirname "${source_path}")" && pwd
+}
+
 color() {
   local code="$1"
   shift
@@ -33,6 +44,21 @@ warn() {
 
 error() {
   color "1;31" "$*" >&2
+}
+
+prompt_input() {
+  local prompt_text="$1"
+  local result_var="$2"
+  local input_value=""
+
+  if [[ ! -r /dev/tty ]]; then
+    printf -v "${result_var}" '%s' ""
+    return 1
+  fi
+
+  read -r -p "${prompt_text}" input_value </dev/tty
+  printf -v "${result_var}" '%s' "${input_value}"
+  return 0
 }
 
 get_env_value() {
@@ -83,11 +109,20 @@ prompt_install_port() {
   local random_port custom_answer chosen_port
   random_port="$(generate_random_port)"
   info "已为本次安装生成随机端口: ${random_port}"
-  read -r -p "是否要自定义端口？[y/N] " custom_answer
+
+  if ! prompt_input "是否要自定义端口？[y/N] " custom_answer; then
+    warn "未检测到可交互终端，默认使用随机端口: ${random_port}"
+    printf '%s\n' "${random_port}"
+    return
+  fi
 
   if [[ "${custom_answer}" =~ ^[Yy]$ ]]; then
     while true; do
-      read -r -p "请输入自定义端口 (1-65535): " chosen_port
+      if ! prompt_input "请输入自定义端口 (1-65535): " chosen_port; then
+        warn "未读取到自定义端口，默认使用随机端口: ${random_port}"
+        printf '%s\n' "${random_port}"
+        return
+      fi
       if [[ "${chosen_port}" =~ ^[0-9]+$ ]] && ((chosen_port >= 1 && chosen_port <= 65535)); then
         printf '%s\n' "${chosen_port}"
         return
