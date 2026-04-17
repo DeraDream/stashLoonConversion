@@ -16,7 +16,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 color() {
   local code="$1"
   shift
-  printf "\033[%sm%s\033[0m\n" "$code" "$*"
+  printf "\033[%sm%s\033[0m\n" "$code" "$*" >&2
 }
 
 info() {
