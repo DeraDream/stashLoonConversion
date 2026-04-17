@@ -45,6 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/DeraDream/stashLoonConversion/main/
 这条命令会自动：
 
 - 从 GitHub 拉取最新代码
+- 自动安装缺失的 `git` 和 `python3`
 - 检测服务是否已安装
 - 未安装时执行安装
 - 已安装时直接打开菜单，不会重复安装
