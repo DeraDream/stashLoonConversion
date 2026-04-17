@@ -42,10 +42,17 @@ GitHub 仓库地址：
 curl -fsSL https://raw.githubusercontent.com/DeraDream/stashLoonConversion/main/bootstrap-install.sh | sudo bash
 ```
 
+如果你怀疑命中了旧缓存，可以用这个等价写法强制拉取最新脚本：
+
+```bash
+curl -fsSL "https://raw.githubusercontent.com/DeraDream/stashLoonConversion/main/bootstrap-install.sh?t=$(date +%s)" | sudo bash
+```
+
 这条命令会自动：
 
 - 从 GitHub 拉取最新代码
 - 自动安装缺失的 `git` 和 `python3`
+- 自动检查并补齐 `systemctl/systemd`
 - 检测服务是否已安装
 - 未安装时执行安装
 - 已安装时直接打开菜单，不会重复安装

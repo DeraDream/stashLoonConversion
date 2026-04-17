@@ -53,13 +53,60 @@ ensure_root() {
   fi
 }
 
+install_pkg() {
+  local pkg="$1"
+  if command -v apt-get >/dev/null 2>&1; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update -y >/dev/null 2>&1
+    apt-get install -y "${pkg}" >/dev/null 2>&1
+    return
+  fi
+  if command -v dnf >/dev/null 2>&1; then
+    dnf install -y "${pkg}" >/dev/null 2>&1
+    return
+  fi
+  if command -v yum >/dev/null 2>&1; then
+    yum install -y "${pkg}" >/dev/null 2>&1
+    return
+  fi
+  if command -v apk >/dev/null 2>&1; then
+    apk add --no-cache "${pkg}" >/dev/null 2>&1
+    return
+  fi
+  error "未找到可用包管理器，请手动安装 ${pkg}"
+  exit 1
+}
+
+ensure_runtime_dependencies() {
+  if ! command -v git >/dev/null 2>&1; then
+    warn "git 未安装，正在自动安装..."
+    install_pkg git
+  fi
+  if ! command -v python3 >/dev/null 2>&1; then
+    warn "python3 未安装，正在自动安装..."
+    install_pkg python3
+  fi
+  if ! command -v systemctl >/dev/null 2>&1; then
+    if command -v apt-get >/dev/null 2>&1; then
+      warn "systemctl 未安装，正在自动安装 systemd..."
+      install_pkg systemd
+    else
+      error "当前系统缺少 systemctl，且暂不支持自动安装。"
+      exit 1
+    fi
+  fi
+}
+
 ensure_dependencies() {
+  ensure_runtime_dependencies
+
+  local required_commands=(bash install cp rm mkdir ln sed awk)
   local missing=()
-  for cmd in bash python3 systemctl install cp rm mkdir ln sed awk git; do
+  for cmd in "${required_commands[@]}"; do
     command -v "$cmd" >/dev/null 2>&1 || missing+=("$cmd")
   done
   if ((${#missing[@]})); then
-    error "缺少依赖命令: ${missing[*]}"
+    error "缺少基础命令: ${missing[*]}"
     exit 1
   fi
 }

@@ -15,6 +15,8 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
+echo "Running environment preflight ..."
+
 install_pkg() {
   local pkg="$1"
   if command -v apt-get >/dev/null 2>&1; then
@@ -47,6 +49,11 @@ fi
 if ! command -v python3 >/dev/null 2>&1; then
   echo "python3 not found, installing ..."
   install_pkg python3
+fi
+
+if ! command -v systemctl >/dev/null 2>&1; then
+  echo "systemctl not found, attempting to install systemd ..."
+  install_pkg systemd
 fi
 
 if [[ -x "${BIN_LINK}" ]]; then
