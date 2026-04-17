@@ -34,25 +34,28 @@ GitHub 仓库地址：
 
 ## Linux VPS 安装
 
-当前推荐方式是先克隆仓库，再执行安装命令。
+推荐直接使用一键安装命令，不需要手动下载、上传或解压项目。
 
-### 1. 克隆仓库
+### 一键安装命令
 
 ```bash
-git clone git@github.com:DeraDream/stashLoonConversion.git
-cd stashLoonConversion
+curl -fsSL https://raw.githubusercontent.com/DeraDream/stashLoonConversion/main/bootstrap-install.sh | sudo bash
 ```
 
-如果服务器没有配置 GitHub SSH，也可以用 HTTPS：
+这条命令会自动：
+
+- 从 GitHub 拉取最新代码
+- 检测服务是否已安装
+- 未安装时执行安装
+- 已安装时直接打开菜单
+
+### 手动执行仓库安装
+
+如果你确实需要手动从源码安装，也可以：
 
 ```bash
 git clone https://github.com/DeraDream/stashLoonConversion.git
 cd stashLoonConversion
-```
-
-### 2. 执行安装
-
-```bash
 sudo bash install.sh
 ```
 
@@ -87,7 +90,7 @@ sudo stashloon
 如果服务器已经安装过本服务，再次执行：
 
 ```bash
-sudo bash install.sh
+curl -fsSL https://raw.githubusercontent.com/DeraDream/stashLoonConversion/main/bootstrap-install.sh | sudo bash
 ```
 
 不会重复安装，而是直接打开菜单。
@@ -110,10 +113,10 @@ sudo stashloon
 
 ### 方式 2：重新执行安装命令
 
-如果当前目录是最新源码，也可以重新执行：
+也可以重新执行一键安装命令：
 
 ```bash
-sudo bash install.sh
+curl -fsSL https://raw.githubusercontent.com/DeraDream/stashLoonConversion/main/bootstrap-install.sh | sudo bash
 ```
 
 如果系统已经安装，会直接进入菜单，不会重复覆盖安装流程。
@@ -194,31 +197,6 @@ PUBLIC_BASE_URL=http://your-server-ip:8080
 - 首页列表：`http://your-server-ip:8080/`
 - 转换页面：`http://your-server-ip:8080/convert`
 
-## macOS 本地运行
-
-如果你是在本机开发调试：
-
-```bash
-cd /Users/dfw/Downloads/stashAndLoon
-python3 server.py
-```
-
-或者：
-
-```bash
-cd /Users/dfw/Downloads/stashAndLoon
-chmod +x start-macos.sh
-./start-macos.sh
-```
-
-本机浏览器访问：
-
-```bash
-http://127.0.0.1:8080
-```
-
-局域网访问时，请把 `PUBLIC_BASE_URL` 改成你的本机 IP。
-
 ## API
 
 ### `POST /api/generate`
@@ -257,10 +235,6 @@ http://127.0.0.1:8080
 Linux VPS 安装后，这些数据位于：
 
 - `/opt/stashloon/app/data/`
-
-macOS 本地运行时，这些数据位于项目目录下的：
-
-- `data/`
 
 ## 后续可扩展
 
