@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>新建配置 - Stash And Loon</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <nav class="top-nav">
+        <a class="nav-link" href="/">配置列表</a>
+        <a class="nav-link nav-link-active" href="/convert">新建配置</a>
+      </nav>
+
+      <section class="hero hero-compact">
+        <p class="eyebrow">Create Config</p>
+        <h1>上传或转换</h1>
+        <p class="hero-copy">
+          在这里提交节点链接，或者上传现有的 Stash YAML。生成完成后会自动写入首页列表，方便后续下载、分享和导入。
+        </p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>节点生成配置</h2>
+          <form id="generate-form">
+            <label>
+              配置名称
+              <input type="text" name="profile_name" placeholder="例如：我的机场配置" />
+            </label>
+            <label>
+              节点内容
+              <textarea
+                name="node_text"
+                rows="10"
+                placeholder="每行一个节点，例如&#10;vless://uuid@example.com:443?security=tls&type=ws&host=example.com&path=%2F#香港01"
+                required
+              ></textarea>
+            </label>
+            <button type="submit">生成配置</button>
+          </form>
+        </article>
+
+        <article class="card">
+          <h2>上传 Stash YAML 转 Loon</h2>
+          <form id="upload-form">
+            <label>
+              选择 YAML 文件
+              <input type="file" id="yaml-file" accept=".yaml,.yml,text/yaml,text/plain" required />
+            </label>
+            <button type="submit">上传并转换</button>
+          </form>
+          <p class="hint">当前内置转换优先支持 vless 节点，适合你后续用固定模板扩展。</p>
+        </article>
+      </section>
+
+      <section id="result" class="card hidden">
+        <h2>生成结果</h2>
+        <div class="result-grid">
+          <div>
+            <h3>文件与导入</h3>
+            <div id="links" class="links"></div>
+          </div>
+          <div>
+            <h3>Stash 预览</h3>
+            <pre id="stash-preview"></pre>
+          </div>
+          <div>
+            <h3>Loon 预览</h3>
+            <pre id="loon-preview"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stash And Loon Converter</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <nav class="top-nav">
+        <a class="nav-link nav-link-active" href="/">配置列表</a>
+        <a class="nav-link" href="/convert">新建配置</a>
+      </nav>
+
+      <section class="hero hero-compact">
+        <p class="eyebrow">Stash / Loon</p>
+        <h1>配置列表</h1>
+        <p class="hero-copy">
+          首页只展示已经保存的配置记录。你可以直接下载、复制链接，或者在手机浏览器中一键唤起 Stash 与 Loon。
+        </p>
+      </section>
+
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <h2>配置列表</h2>
+            <p class="hint">这里会保存你上传或生成过的配置，支持下载文件、复制链接和直接导入。</p>
+          </div>
+          <div class="section-actions">
+            <a class="action-button accent-button" href="/convert">去新建配置</a>
+            <button id="refresh-records" type="button" class="ghost-button">刷新列表</button>
+          </div>
+        </div>
+        <div id="records-empty" class="empty-state">还没有配置记录，先上传一个 YAML 或生成一份配置吧。</div>
+        <div id="records-list" class="records-list"></div>
+      </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

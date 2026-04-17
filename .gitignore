@@ -1,0 +1,5 @@
+.DS_Store
+.env
+.pycache/
+data/generated/
+data/index.json
