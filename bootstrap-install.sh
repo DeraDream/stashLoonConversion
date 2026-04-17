@@ -4,6 +4,7 @@ set -euo pipefail
 REPO_URL="${REPO_URL:-https://github.com/DeraDream/stashLoonConversion.git}"
 BIN_LINK="/usr/local/bin/stashloon"
 APP_MENU="/opt/stashloon/app/scripts/stashloon-menu.sh"
+INSTALLED_ALREADY="0"
 
 if [[ "$(uname -s)" != "Linux" ]]; then
   echo "This installer currently supports Linux VPS only." >&2
@@ -56,14 +57,9 @@ if ! command -v systemctl >/dev/null 2>&1; then
   install_pkg systemd
 fi
 
-if [[ -x "${BIN_LINK}" ]]; then
-  echo "Detected existing installation, opening menu ..."
-  exec "${BIN_LINK}"
-fi
-
-if [[ -x "${APP_MENU}" ]]; then
-  echo "Detected existing installation, opening menu ..."
-  exec "${APP_MENU}"
+if [[ -x "${BIN_LINK}" ]] || [[ -x "${APP_MENU}" ]]; then
+  echo "Detected existing installation, preparing latest menu ..."
+  INSTALLED_ALREADY="1"
 fi
 
 TEMP_DIR="$(mktemp -d)"
@@ -76,4 +72,8 @@ echo "Cloning ${REPO_URL} ..."
 git clone --depth 1 "${REPO_URL}" "${TEMP_DIR}/repo" >/dev/null 2>&1
 
 cd "${TEMP_DIR}/repo"
+if [[ "${INSTALLED_ALREADY}" == "1" ]]; then
+  exec bash scripts/stashloon-menu.sh
+fi
+
 exec bash install.sh

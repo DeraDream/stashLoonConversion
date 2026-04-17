@@ -55,7 +55,7 @@ curl -fsSL "https://raw.githubusercontent.com/DeraDream/stashLoonConversion/main
 - 自动检查并补齐 `systemctl/systemd`
 - 检测服务是否已安装
 - 未安装时执行安装
-- 已安装时直接打开菜单，不会重复安装
+- 已安装时直接打开最新菜单，不会重复安装
 
 ### 手动执行仓库安装
 
