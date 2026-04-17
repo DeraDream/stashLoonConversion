@@ -22,11 +22,14 @@ run_install() {
   mkdir -p "${INSTALL_ROOT}"
   copy_project_files "${source_dir}"
   ensure_config_file
+  local panel_url
+  panel_url="$(configure_panel_address)"
   write_service_file
   install_command_link
   reload_and_enable_service
 
   success "安装完成。"
+  success "面板地址: ${panel_url}"
   print_status
   info "现在可以直接运行命令: stashloon"
   exec "${APP_DIR}/scripts/stashloon-menu.sh"

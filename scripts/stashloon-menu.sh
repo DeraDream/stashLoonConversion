@@ -80,6 +80,7 @@ show_menu() {
   while true; do
     printf "\n"
     info "========== StashLoon 菜单 =========="
+    info "面板地址: $(get_panel_url)"
     printf "1. 安装\n"
     printf "2. 更新\n"
     printf "3. 重启\n"

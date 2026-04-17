@@ -73,7 +73,9 @@ sudo bash install.sh
 - 写入环境配置到 `/etc/stashloon/stashloon.env`
 - 创建 `systemd` 服务 `stashloon.service`
 - 创建全局命令 `stashloon`
+- 先随机生成一个端口，并允许你交互式改成自定义端口
 - 启动服务并设置开机自启
+- 安装完成后打印完整面板地址
 
 ### 3. 安装完成后使用菜单
 
@@ -92,6 +94,8 @@ sudo stashloon
 - 重启
 - 卸载
 - 状态
+
+菜单顶部会显示当前面板地址，方便你随时查看访问入口。
 
 ### 4. 防重复安装逻辑
 

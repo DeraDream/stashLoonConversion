@@ -35,6 +35,93 @@ error() {
   color "1;31" "$*" >&2
 }
 
+get_env_value() {
+  local key="$1"
+  if [[ ! -f "${ENV_FILE}" ]]; then
+    return 0
+  fi
+  awk -F= -v wanted="${key}" '$1==wanted {print substr($0, index($0, "=") + 1)}' "${ENV_FILE}" | tail -n 1
+}
+
+set_env_value() {
+  local key="$1"
+  local value="$2"
+  mkdir -p "${CONFIG_DIR}"
+  touch "${ENV_FILE}"
+  if grep -q "^${key}=" "${ENV_FILE}"; then
+    sed -i "s|^${key}=.*|${key}=${value}|" "${ENV_FILE}"
+  else
+    printf '%s=%s\n' "${key}" "${value}" >>"${ENV_FILE}"
+  fi
+}
+
+detect_server_ip() {
+  local ip_addr
+  ip_addr="$(hostname -I 2>/dev/null | awk '{print $1}')"
+  if [[ -n "${ip_addr}" ]]; then
+    printf '%s\n' "${ip_addr}"
+    return
+  fi
+
+  ip_addr="$(ip route get 1.1.1.1 2>/dev/null | awk '{for (i=1; i<=NF; i++) if ($i=="src") {print $(i+1); exit}}')"
+  if [[ -n "${ip_addr}" ]]; then
+    printf '%s\n' "${ip_addr}"
+    return
+  fi
+
+  printf '127.0.0.1\n'
+}
+
+generate_random_port() {
+  python3 - <<'PY'
+import random
+print(random.randint(20000, 60000))
+PY
+}
+
+prompt_install_port() {
+  local random_port custom_answer chosen_port
+  random_port="$(generate_random_port)"
+  info "已为本次安装生成随机端口: ${random_port}"
+  read -r -p "是否要自定义端口？[y/N] " custom_answer
+
+  if [[ "${custom_answer}" =~ ^[Yy]$ ]]; then
+    while true; do
+      read -r -p "请输入自定义端口 (1-65535): " chosen_port
+      if [[ "${chosen_port}" =~ ^[0-9]+$ ]] && ((chosen_port >= 1 && chosen_port <= 65535)); then
+        printf '%s\n' "${chosen_port}"
+        return
+      fi
+      warn "端口无效，请重新输入。"
+    done
+  fi
+
+  printf '%s\n' "${random_port}"
+}
+
+configure_panel_address() {
+  local port ip_addr panel_url
+  port="$(prompt_install_port)"
+  ip_addr="$(detect_server_ip)"
+  panel_url="http://${ip_addr}:${port}"
+
+  set_env_value HOST "0.0.0.0"
+  set_env_value PORT "${port}"
+  set_env_value PUBLIC_BASE_URL "${panel_url}"
+
+  printf '%s\n' "${panel_url}"
+}
+
+get_panel_url() {
+  local panel_url
+  panel_url="$(get_env_value PUBLIC_BASE_URL)"
+  if [[ -n "${panel_url}" ]]; then
+    printf '%s\n' "${panel_url}"
+    return
+  fi
+  printf 'http://%s:%s\n' "$(detect_server_ip)" "$(get_env_value PORT)"
+}
+
 is_installed() {
   [[ -f "${APP_DIR}/server.py" ]] && [[ -f "${SERVICE_FILE}" ]]
 }
@@ -215,6 +302,7 @@ prepare_source_dir() {
 print_status() {
   info "安装目录: ${APP_DIR}"
   info "配置文件: ${ENV_FILE}"
+  info "面板地址: $(get_panel_url)"
   if systemctl is-active --quiet "${SERVICE_NAME}"; then
     success "服务状态: 运行中"
   else
